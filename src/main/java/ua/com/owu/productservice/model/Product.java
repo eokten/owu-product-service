@@ -24,4 +24,6 @@ public class Product {
     private String category;
 
     private BigDecimal price;
+
+    private String shopId;
 }

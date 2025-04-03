@@ -2,6 +2,7 @@ package ua.com.owu.productservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import ua.com.owu.productservice.dto.CreateProductDto;
 import ua.com.owu.productservice.dto.PatchProductDto;
 import ua.com.owu.productservice.dto.ProductDto;
@@ -21,7 +22,15 @@ public class ProductService {
 
     private final ProductMapper productMapper;
 
+    private final UserService userService;
+
     public ProductDto createProduct(CreateProductDto createProductDto) {
+        String shopId = createProductDto.shopId();
+
+        if (!userService.getUserAssignedShopIds().contains(shopId)) {
+            throw new ResourceAccessException("User is not assigned to this shop");
+        }
+
         Product product = productMapper.toProduct(createProductDto);
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductDto(savedProduct);
@@ -38,6 +47,10 @@ public class ProductService {
     public Optional<ProductDto> updateProduct(String id, UpdateProductDto updateProductDto) {
         return productRepository.findById(id)
                 .map(product -> {
+                    if (!userService.getUserAssignedShopIds().contains(product.getShopId())) {
+                        throw new ResourceAccessException("User is not assigned to this shop");
+                    }
+
                     productMapper.updateProduct(product, updateProductDto);
                     return productRepository.save(product);
                 })
@@ -47,6 +60,10 @@ public class ProductService {
     public Optional<ProductDto> patchProduct(String id, PatchProductDto patchProductDto) {
         return productRepository.findById(id)
                 .map(product -> {
+                    if (!userService.getUserAssignedShopIds().contains(product.getShopId())) {
+                        throw new ResourceAccessException("User is not assigned to this shop");
+                    }
+
                     productMapper.patchProduct(product, patchProductDto);
                     return productRepository.save(product);
                 })
@@ -54,6 +71,13 @@ public class ProductService {
     }
 
     public void deleteProduct(String id) {
-        productRepository.deleteById(id);
+        productRepository.findById(id)
+                .ifPresent(product -> {
+                    if (!userService.getUserAssignedShopIds().contains(product.getShopId())) {
+                        throw new ResourceAccessException("User is not assigned to this shop");
+                    }
+
+                    productRepository.deleteById(product.getId());
+                });
     }
 }
