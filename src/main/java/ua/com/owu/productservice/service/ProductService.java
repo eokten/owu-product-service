@@ -3,14 +3,15 @@ package ua.com.owu.productservice.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
-import ua.com.owu.productservice.dto.CreateProductDto;
-import ua.com.owu.productservice.dto.PatchProductDto;
-import ua.com.owu.productservice.dto.ProductDto;
-import ua.com.owu.productservice.dto.UpdateProductDto;
+import ua.com.owu.productservice.api.rest.model.CreateProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.PatchProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.ProductResponseDto;
+import ua.com.owu.productservice.api.rest.model.UpdateProductRequestDto;
 import ua.com.owu.productservice.mapper.ProductMapper;
 import ua.com.owu.productservice.model.Product;
 import ua.com.owu.productservice.repository.ProductRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ public class ProductService {
 
     private final UserService userService;
 
-    public ProductDto createProduct(CreateProductDto createProductDto) {
-        String shopId = createProductDto.shopId();
+    public ProductResponseDto createProduct(CreateProductRequestDto createProductDto) {
+        String shopId = createProductDto.getShopId();
 
         if (!userService.getUserAssignedShopIds().contains(shopId)) {
             throw new ResourceAccessException("User is not assigned to this shop");
@@ -36,15 +37,22 @@ public class ProductService {
         return productMapper.toProductDto(savedProduct);
     }
 
-    public Optional<ProductDto> findProduct(String id) {
+    public Optional<ProductResponseDto> findProduct(String id) {
         return productRepository.findById(id).map(productMapper::toProductDto);
     }
 
-    public List<Product> findAllProducts() {
-        return productRepository.findAll();
+    public List<ProductResponseDto> findAllProducts() {
+        return productRepository.findAll().stream().map(productMapper::toProductDto).toList();
     }
 
-    public Optional<ProductDto> updateProduct(String id, UpdateProductDto updateProductDto) {
+    public List<ProductResponseDto> findAllProductsWithPriceGreaterThan(BigDecimal minPrice) {
+        return productRepository.findByPriceGreaterThan(minPrice)
+                .stream()
+                .map(productMapper::toProductDto)
+                .toList();
+    }
+
+    public Optional<ProductResponseDto> updateProduct(String id, UpdateProductRequestDto updateProductDto) {
         return productRepository.findById(id)
                 .map(product -> {
                     if (!userService.getUserAssignedShopIds().contains(product.getShopId())) {
@@ -57,7 +65,7 @@ public class ProductService {
                 .map(productMapper::toProductDto);
     }
 
-    public Optional<ProductDto> patchProduct(String id, PatchProductDto patchProductDto) {
+    public Optional<ProductResponseDto> patchProduct(String id, PatchProductRequestDto patchProductDto) {
         return productRepository.findById(id)
                 .map(product -> {
                     if (!userService.getUserAssignedShopIds().contains(product.getShopId())) {

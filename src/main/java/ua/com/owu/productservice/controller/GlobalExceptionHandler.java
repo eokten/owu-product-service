@@ -7,9 +7,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
-import ua.com.owu.productservice.dto.ErrorDto;
+import ua.com.owu.productservice.api.rest.model.ErrorDto;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,19 +30,19 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorDto.builder()
+                .body(new ErrorDto()
                         .message("Validation failed")
-                        .timestamp(Instant.now())
-                        .details(details).build());
+                        .timestamp(OffsetDateTime.now())
+                        .details(details));
     }
 
     @ExceptionHandler(ResourceAccessException.class)
     public ResponseEntity<ErrorDto> handleResourceAccessException(ResourceAccessException e) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(ErrorDto.builder()
+                .body(new ErrorDto()
                         .message(e.getMessage())
-                        .timestamp(Instant.now())
-                        .details(Collections.emptyMap()).build());
+                        .timestamp(OffsetDateTime.now())
+                        .details(Collections.emptyMap()));
     }
 }

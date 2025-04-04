@@ -6,8 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.math.BigDecimal;
+
+import static org.springframework.data.mongodb.core.mapping.FieldType.DECIMAL128;
 
 @Document("products")
 @Data
@@ -23,6 +26,7 @@ public class Product {
 
     private String category;
 
+    @Field(targetType = DECIMAL128)
     private BigDecimal price;
 
     private String shopId;

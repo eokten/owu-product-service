@@ -1,0 +1,263 @@
+openapi: "3.1.0"
+
+info:
+  title: "Product Service API"
+  description: "This is a demo specification of Product Service"
+  version: 1.0.0
+
+servers:
+  - url: "http://localhost:8080"
+
+tags:
+  - name: Product
+
+paths:
+  /api/v1/products:
+    post:
+      tags:
+        - Product
+      summary: "Create product"
+      operationId: "createProduct"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+        required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        400:
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "Forbidden"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags:
+        - Product
+      summary: "Get all products"
+      operationId: "getProducts"
+      parameters:
+        - name: minPrice
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductResponse"
+  /api/v1/products/{productId}:
+    get:
+      tags:
+        - Product
+      summary: "Get product by ID"
+      operationId: "getProduct"
+      parameters:
+        # can be replaced with - $ref: "#/components/parameters/ProductId"
+        # but left to show how path parameter can be specified
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        404:
+          description: "Product not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Product
+      summary: "Update product by ID"
+      operationId: "updateProduct"
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+        required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        400:
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: "Product not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      tags:
+        - Product
+      summary: "Patch product by ID"
+      description: "Partially updates product (with only non-null fields from request body)"
+      operationId: "patchProduct"
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchProductRequest"
+        required: true
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        404:
+          description: "Product not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Product
+      summary: "Delete product by ID"
+      operationId: "deleteProduct"
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+
+components:
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    CreateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 20
+        category:
+          type: string
+          minLength: 3
+          maxLength: 20
+        price:
+          type: number
+          minimum: 0.00
+          exclusiveMinimum: true
+          maximum: 100000.00
+        shopId:
+          type: string
+          minLength: 1
+          maxLength: 5
+      required:
+        - name
+        - category
+        - price
+        - shopId
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: number
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 20
+        category:
+          type: string
+          minLength: 3
+          maxLength: 20
+        price:
+          type: number
+          minimum: 0.00
+          exclusiveMinimum: true
+          maximum: 100000.00
+      required:
+        - name
+        - category
+        - price
+    PatchProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 20
+        category:
+          type: string
+          minLength: 3
+          maxLength: 20
+        price:
+          type: number
+          minimum: 0.00
+          exclusiveMinimum: true
+          maximum: 100000.00
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - message
+        - timestamp
+        - details

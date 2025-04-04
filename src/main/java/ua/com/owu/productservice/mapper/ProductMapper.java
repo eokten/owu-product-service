@@ -4,21 +4,21 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import ua.com.owu.productservice.dto.CreateProductDto;
-import ua.com.owu.productservice.dto.PatchProductDto;
-import ua.com.owu.productservice.dto.ProductDto;
-import ua.com.owu.productservice.dto.UpdateProductDto;
+import ua.com.owu.productservice.api.rest.model.CreateProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.PatchProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.ProductResponseDto;
+import ua.com.owu.productservice.api.rest.model.UpdateProductRequestDto;
 import ua.com.owu.productservice.model.Product;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
-    Product toProduct(CreateProductDto createProductDto);
+    Product toProduct(CreateProductRequestDto createProductDto);
 
-    ProductDto toProductDto(Product product);
+    ProductResponseDto toProductDto(Product product);
 
-    void updateProduct(@MappingTarget Product product, UpdateProductDto updateProductDto);
+    void updateProduct(@MappingTarget Product product, UpdateProductRequestDto updateProductDto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void patchProduct(@MappingTarget Product product, PatchProductDto patchProductDto);
+    void patchProduct(@MappingTarget Product product, PatchProductRequestDto patchProductDto);
 }
