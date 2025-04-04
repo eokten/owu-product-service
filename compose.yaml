@@ -40,7 +40,7 @@ services:
     networks:
       - keycloak-net
     volumes:
-      - ./misc/keycloak/owu-ecommerce-realm-google-idp.json:/opt/keycloak/data/import/owu-ecommerce-realm.json
+      - ./misc/keycloak/owu-ecommerce-realm.json:/opt/keycloak/data/import/owu-ecommerce-realm.json
     command: start-dev --import-realm
 
 volumes:

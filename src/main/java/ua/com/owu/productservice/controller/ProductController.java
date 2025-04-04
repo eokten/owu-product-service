@@ -1,63 +1,58 @@
 package ua.com.owu.productservice.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ua.com.owu.productservice.dto.CreateProductDto;
-import ua.com.owu.productservice.dto.PatchProductDto;
-import ua.com.owu.productservice.dto.ProductDto;
-import ua.com.owu.productservice.dto.UpdateProductDto;
-import ua.com.owu.productservice.model.Product;
+import ua.com.owu.productservice.api.rest.controller.ProductApi;
+import ua.com.owu.productservice.api.rest.model.CreateProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.PatchProductRequestDto;
+import ua.com.owu.productservice.api.rest.model.ProductResponseDto;
+import ua.com.owu.productservice.api.rest.model.UpdateProductRequestDto;
 import ua.com.owu.productservice.service.ProductService;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
-public class ProductController {
+public class ProductController implements ProductApi {
 
     private final ProductService productService;
 
     @PreAuthorize("hasRole('SHOP_MANAGER')")
-    @PostMapping
-    public ProductDto createProduct(@RequestBody @Valid CreateProductDto createProductDto) {
-        return productService.createProduct(createProductDto);
+    @Override
+    public ResponseEntity<ProductResponseDto> createProduct(CreateProductRequestDto createProductRequestDto) {
+        return ResponseEntity.ok(productService.createProduct(createProductRequestDto));
     }
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable("productId") String productId) {
+    @Override
+    public ResponseEntity<ProductResponseDto> deleteProduct(String productId) {
+        productService.deleteProduct(productId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<ProductResponseDto> getProduct(String productId) {
         return ResponseEntity.of(productService.findProduct(productId));
     }
 
-    @GetMapping
-    public List<Product> getProducts() {
-        return productService.findAllProducts();
+    @Override
+    public ResponseEntity<List<ProductResponseDto>> getProducts(BigDecimal minPrice) {
+        if (minPrice == null) {
+            return ResponseEntity.ok(productService.findAllProducts());
+        } else {
+            return ResponseEntity.ok(productService.findAllProductsWithPriceGreaterThan(minPrice));
+        }
     }
 
-    @PutMapping("/{productId}")
-    public ResponseEntity<ProductDto> updateProduct(@PathVariable("productId") String productId, @RequestBody @Valid UpdateProductDto updateProductDto) {
-        return ResponseEntity.of(productService.updateProduct(productId, updateProductDto));
+    @Override
+    public ResponseEntity<ProductResponseDto> patchProduct(String productId, PatchProductRequestDto patchProductRequestDto) {
+        return ResponseEntity.of(productService.patchProduct(productId, patchProductRequestDto));
     }
 
-    @PatchMapping("/{productId}")
-    public ResponseEntity<ProductDto> patchProduct(@PathVariable("productId") String productId, @RequestBody @Valid PatchProductDto patchProductDto) {
-        return ResponseEntity.of(productService.patchProduct(productId, patchProductDto));
-    }
-
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<ProductDto> deleteProduct(@PathVariable("productId") String productId) {
-        productService.deleteProduct(productId);
-        return ResponseEntity.noContent().build();
+    @Override
+    public ResponseEntity<ProductResponseDto> updateProduct(String productId, UpdateProductRequestDto updateProductRequestDto) {
+        return ResponseEntity.of(productService.updateProduct(productId, updateProductRequestDto));
     }
 }
