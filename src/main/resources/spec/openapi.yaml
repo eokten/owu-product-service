@@ -11,6 +11,9 @@ servers:
 tags:
   - name: Product
 
+security:
+  - BearerAuth: [ ]
+
 paths:
   /api/v1/products:
     post:
@@ -165,6 +168,12 @@ paths:
                 $ref: "#/components/schemas/ProductResponse"
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   parameters:
     ProductId:
       name: productId
